@@ -16,7 +16,7 @@ AIChatPlugin 是一个为 Terraria 游戏服务器设计的插件，它允许玩
 
 ## 安装步骤
 
-1. 将 AIChatPlugin 插件文件放置在 TShock 插件目录下。
+1. 将 AIChatPlugin 插件文件放置在 ServerPlugins 插件目录下。
 2. 确保你的 Terraria 服务器已经安装并运行 TShock。
 3. 重启 TShock 以加载插件。
 
@@ -31,7 +31,7 @@ AIChatPlugin 是一个为 Terraria 游戏服务器设计的插件，它允许玩
 
 ## 配置文件
 
-AIChatPlugin 使用一个 JSON 格式的配置文件，位于 `TShock.SavePath` 目录下，名为 `AI聊天自定义配置.json`。你可以编辑此文件来自定义插件的行为：
+AIChatPlugin 使用一个 JSON 格式的配置文件，位于 `tshock` 目录下，名为 `AI聊天自定义配置.json`。你可以编辑此文件来自定义插件的行为：
 
 - **模型选择**：选择 AI 模型，1 为通用，2 为速度。
 - **聊天触发 AI 提示词**：定义触发 AI 对话的关键词。
