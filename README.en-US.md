@@ -51,4 +51,4 @@ The AIChatPlugin uses a JSON-formatted configuration file, located in the `tshoc
 
 ## Contribute and support
 
-If you have any questions or suggestions, please feel free to submit an issue or pull request via GitHub, and you can also contact the plugin's author, Mirrorchild Blue.
+If you have any questions or suggestions, please feel free to submit an issue or pull request via GitHub, and you can also contact the plugin's author.
