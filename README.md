@@ -55,13 +55,9 @@ AIChatPlugin 使用一个 JSON 格式的配置文件，位于 `tshock` 目录下
 
 如果你有任何问题或建议，欢迎通过 GitHub 提交 issue 或 pull request。同时，你也可以联系插件作者：镜奇路蓝。
 
+## English：
 
-
-
-
-English：
-
-## AIChatPlugin - Terraria Plugin
+### AIChatPlugin - Terraria Plugin
 
 ## Overview
 
