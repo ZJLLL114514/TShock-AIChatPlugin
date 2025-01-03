@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
@@ -52,11 +52,11 @@ namespace Plugin
             {
                 if (disposing)
                 {
-                    PlayerHooks.PlayerLogout -= OnPlayerLogout;  // 卸载玩家登出钩子
+                    PlayerHooks.PlayerLogout -= OnPlayerLogout;  //卸载玩家登出钩子
                     ServerApi.Hooks.ServerChat.Deregister(this, OnChat); //卸载聊天钩子
                     Commands.ChatCommands.RemoveAll(cmd => cmd.CommandDelegate.Method?.DeclaringType?.Assembly == Assembly.GetExecutingAssembly());  //移除插件所有命令
-                    playerContexts.Clear();  // 清理所有玩家的上下文记录
-                    isProcessing.Clear();  // 清理所有玩家的处理状态
+                    playerContexts.Clear();  //清理所有玩家的上下文记录
+                    isProcessing.Clear();  //清理所有玩家的处理状态
                 }
             }
             catch (Exception ex)
@@ -150,8 +150,8 @@ namespace Plugin
                         tempConfig.AIZSXZ = tempConfig.AIZSXZ > 0 ? tempConfig.AIZSXZ : 666;
                         tempConfig.AIHH = tempConfig.AIHH > 0 ? tempConfig.AIHH : 50;
                         tempConfig.AISXW = tempConfig.AISXW > 0 ? tempConfig.AISXW : 10;
-                        tempConfig.AILWSS = tempConfig.AILWSS; // 布尔值不需要额外检查
-                        tempConfig.AIXXZF = tempConfig.AIXXZF; // 布尔值不需要额外检查
+                        tempConfig.AILWSS = tempConfig.AILWSS; //布尔值不需要额外检查
+                        tempConfig.AIXXZF = tempConfig.AIXXZF; //布尔值不需要额外检查
                         tempConfig.QQQL = tempConfig.QQQL >= 0 ? tempConfig.QQQL : 0;
                         tempConfig.AISET = tempConfig.AISET ?? "你是一个简洁高效的AI，擅长用一句话精准概括复杂问题。";
                         tempConfig.AIWD = tempConfig.AIWD >= 0 ? tempConfig.AIWD : 0.5;
@@ -170,7 +170,7 @@ namespace Plugin
             string json = JsonConvert.SerializeObject(Config, Formatting.Indented);  //序列化配置
             File.WriteAllText(FilePath, json);  //写入配置文件
         }
-        public void ReloadConfig()  // 重载配置
+        public void ReloadConfig()  //重载配置
         {
             LoadConfig();  //重新加载配置
         }
@@ -228,8 +228,8 @@ namespace Plugin
         #region 问题限制
         private static Dictionary<int, List<string>> playerContexts = new Dictionary<int, List<string>>();  //玩家上下文记录
         private static readonly Dictionary<int, bool> isProcessing = new Dictionary<int, bool>();  //玩家是否正在处理
-        private static DateTime lastCmdTime = DateTime.MinValue;  // 上一次命令时间
-        private static readonly int cooldownDuration = 6;  // 命令冷却时间
+        private static DateTime lastCmdTime = DateTime.MinValue;  //上一次命令时间
+        private static readonly int cooldownDuration = 6;  //命令冷却时间
         private void ChatWithAI(TSPlayer player, string question)  //聊天触发AI回答
         {
             int playerIndex = player.Index;  //获取玩家索引
@@ -530,26 +530,26 @@ namespace Plugin
                     TShock.Log.ConsoleError("[AI聊天插件] 未找到 CaiBot 插件的 SendDateAsync 方法。");
                     return Task.CompletedTask;  //直接返回
                 }
-                // 检查群号是否有效
-                if (Config.QQQL >= 10000 && Config.QQQL <= 999999999)  // 群号范围是6到9位数，且从10000开始
+                //检查群号是否有效
+                if (Config.QQQL >= 10000 && Config.QQQL <= 999999999)  //群号范围是6到9位数，且从10000开始
                 {
-                    var result = new  // 创建 CaiBot 插件的 MessageHandle 类型实例
+                    var result = new  //创建 CaiBot 插件的 MessageHandle 类型实例
                     {
                         type = "chat",
                         chat = $"[AI聊天转发]\n{message}",
                         group = Config.QQQL,
                     };
-                    string jsonMessage = JsonConvert.SerializeObject(result);  // 序列化 CaiBot 插件的 MessageHandle 类型实例
-                    var invokeResult = sendDateAsyncMethod.Invoke(null, new object[] { jsonMessage });  // 调用 CaiBot 插件的 SendDateAsync 方法
-                    if (invokeResult == null)  // 调用 CaiBot 插件的 SendDateAsync 方法返回了 null
+                    string jsonMessage = JsonConvert.SerializeObject(result);  //序列化 CaiBot 插件的 MessageHandle 类型实例
+                    var invokeResult = sendDateAsyncMethod.Invoke(null, new object[] { jsonMessage });  //调用 CaiBot 插件的 SendDateAsync 方法
+                    if (invokeResult == null)  //调用 CaiBot 插件的 SendDateAsync 方法返回了 null
                     {
                         TShock.Log.ConsoleError("[AI聊天插件] 调用 SendDateAsync 方法时返回了 null。");
-                        return Task.CompletedTask;  // 直接返回
+                        return Task.CompletedTask;  //直接返回
                     }
                 }
-                else  // 群号无效
+                else  //群号无效
                 {
-                    return Task.CompletedTask;  // 直接返回
+                    return Task.CompletedTask;  //直接返回
                 }
             }
             catch (Exception ex)  //转发消息到 CaiBot 插件时发生错误
