@@ -24,24 +24,24 @@ AIChatPlugin is a plugin for the Terraria game server that allows players to int
 
 - **Activate AI Conversation**: Type `AI` or another customized trigger word in the chat field and type your question.
 - **Send command**:
-  - `/aibot` or `/ab`: Ask the AI a question.
-  - `/botreset`: clear your context record.
-  - `/bothelp`: show help messages.
-  - `/clearAllcontext`: administrator command that clears all players' context records.
+  - `/ab`: Ask the AI a question.
+  - `/bcz`: clear your context record.
+  - `/bhelp`: show help messages.
+  - `/botclearall`: administrator command that clears all players' context records.
 
 ## Configuration files
 
 The AIChatPlugin uses a JSON-formatted configuration file, located in the `tshock` directory, called `AIChatConfig.json`. You can edit this file to customize the behavior of the plugin:
 
-- **模型选择**: selects the AI model, 1 for generic, 2 for speed.
-- **聊天触发AI提示词**: define the keyword to trigger AI dialog.
-- **AI回答字数限制**: set the maximum number of words for AI answer.
-- **AI回答换行字数**: Set the number of characters for AI answer to automatically break lines.
-- **上下文限制**: Set the maximum number of context records per player.
-- **启用联网搜索**: Whether to allow AI to perform network search.
-- **AI设定**: customize the behavior of AI.
-- **temperature温度**: set the temperature parameter for AI to answer.
-- **top_p核采样**: set the top_p parameter of AI response.
+- **Model selection**: selects the AI model, 1 for generic, 2 for speed.
+- **Chat triggers AI prompt words**: define the keyword to trigger AI dialog.
+- **AI answers word limit**: set the maximum number of words for AI answer.
+- **The number of words in line breaks that the AI answers**: Set the number of characters for AI answer to automatically break lines.
+- **Contextual limitations**: Set the maximum number of context records per player.
+- **Enable networked search**: Whether to allow AI to perform network search.
+- **AI settings**: customize the behavior of AI.
+- **temperature**: set the temperature parameter for AI to answer.
+- **top_p**: set the top_p parameter of AI response.
 
 ## Notes
 
