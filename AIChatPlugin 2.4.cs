@@ -27,11 +27,11 @@ namespace Plugin
         }
         public override void Initialize()  //插件命令注册
         {
-            Commands.ChatCommands.Add(new Command("tshock.cfg.reload", AIQCSXW, "清除所有人的上下文"));
+            Commands.ChatCommands.Add(new Command("tshock.cfg.reload", AIQCSXW, "aiclearall"));
             Commands.ChatCommands.Add(new Command("tshock.cfg.reload", AIreload, "reload"));
-            Commands.ChatCommands.Add(new Command("tshock.canchat", ChatWithAICommand, "ab", "aibot"));
-            Commands.ChatCommands.Add(new Command("tshock.canchat", BotReset, "bot重置", "bcz"));
-            Commands.ChatCommands.Add(new Command("tshock.canchat", BotHelp, "bot帮助", "bbz"));
+            Commands.ChatCommands.Add(new Command("tshock.canchat", ChatWithAICommand, "ab"));
+            Commands.ChatCommands.Add(new Command("tshock.canchat", BotReset, "bcz"));
+            Commands.ChatCommands.Add(new Command("tshock.canchat", BotHelp, "bbz"));
             PlayerHooks.PlayerLogout += OnPlayerLogout;  //注册玩家登出钩子
             ServerApi.Hooks.ServerChat.Register(this, OnChat);  //注册聊天钩子
         }
@@ -39,19 +39,19 @@ namespace Plugin
         #region 插件卸载
         protected override void Dispose(bool disposing)  //插件卸载时执行的代码
         {
-           if (disposing)
-           {
-               PlayerHooks.PlayerLogout -= OnPlayerLogout;  //卸载玩家登出钩子
-               ServerApi.Hooks.ServerChat.Deregister(this, OnChat); //卸载聊天钩子
-               Commands.ChatCommands.RemoveAll(cmd => cmd.CommandDelegate.Method?.DeclaringType?.Assembly == Assembly.GetExecutingAssembly());  //移除插件所有命令
-               playerContexts.Clear();  //清理所有玩家的上下文记录
-               isProcessing.Clear();  //清理所有玩家的处理状态
-           }
+            if (disposing)
+            {
+                PlayerHooks.PlayerLogout -= OnPlayerLogout;  //卸载玩家登出钩子
+                ServerApi.Hooks.ServerChat.Deregister(this, OnChat); //卸载聊天钩子
+                Commands.ChatCommands.RemoveAll(cmd => cmd.CommandDelegate.Method?.DeclaringType?.Assembly == Assembly.GetExecutingAssembly());  //移除插件所有命令
+                playerContexts.Clear();  //清理所有玩家的上下文记录
+                isProcessing.Clear();  //清理所有玩家的处理状态
+            }
         }
         #endregion
         #region 创建配置
         public static Configuration Config { get; private set; } = new Configuration();  //配置文件类
-        public static readonly string FilePath = Path.Combine(TShock.SavePath, "AI聊天自定义配置.json");  //创建配置文件在tshock目录下
+        public static readonly string FilePath = Path.Combine(TShock.SavePath, "AI聊天配置.json");  //创建配置文件在tshock目录下
         public static string AIMSQH => Config.AIMSQH;  //AI模型选择
         public static string AILTCF => Config.AILTCF;  //AI聊天触发词
         public static int AIZSXZ => Config.AIZSXZ;  //AI字数限制
@@ -66,7 +66,7 @@ namespace Plugin
         public class Configuration  //默认配置文件
         {
             [JsonProperty("模型选择：1为通用，2为速度")]
-            public string AIMSQH { get; set; } = "1";
+            public string AIMSQH { get; set; } = "2";
             [JsonProperty("聊天触发AI提示词")]
             public string AILTCF { get; set; } = "AI";
             [JsonProperty("AI回答字数限制")]
@@ -108,8 +108,8 @@ namespace Plugin
                     {
                         if (tempConfig.AIMSQH != "1" && tempConfig.AIMSQH != "2")  //模型切换值无效
                         {
-                            TShock.Log.ConsoleError($"[AI聊天插件] 配置文件中 模式 值无效，已使用默认值 1 ，并保留原配置");  //输出错误信息
-                            tempConfig.AIMSQH = "1";  //使用默认值
+                            TShock.Log.ConsoleError($"[AI聊天插件] 模式无效，已保留原配置，并使用默认值 2 ");  //输出错误信息
+                            tempConfig.AIMSQH = "2";  //使用默认值
                         }
                         //彻底解决配置文件相关的错误，并保留原配置
                         tempConfig.AILTCF = tempConfig.AILTCF ?? "AI";
@@ -127,24 +127,24 @@ namespace Plugin
                 }
                 catch (Exception ex)  //读取配置文件时发生错误
                 {
-                    TShock.Log.ConsoleError($"[AI聊天插件] 加载配置时发生错误，已保留旧配置，详细信息：{ex.Message}");
+                    TShock.Log.ConsoleError($"[AI聊天插件] 加载配置时发生错误，已保留原配置，使用默认值，错误信息：{ex.Message}");
                 }
             }
         }
         private void AIreload(CommandArgs args)  //显示配置信息并重新加载配置
         {
             LoadConfig();  //重新加载配置
-            args.Player.SendSuccessMessage("[AI聊天插件] 配置已重新加载。");
+            args.Player.SendSuccessMessage("[AI聊天插件] 配置已重载");
             string configInfo = $"当前AI聊天配置：\n" +
-                                $"模型选择：{Config.AIMSQH}\n" +
-                                $"聊天触发AI提示词：{Config.AILTCF}\n" +
-                                $"AI回答字数限制：{Config.AIZSXZ}\n" +
-                                $"AI回答换行字数：{Config.AIHH}\n" +
+                                $"模型：{Config.AIMSQH}\n" +
+                                $"聊天触发词：{Config.AILTCF}\n" +
+                                $"回答字限制：{Config.AIZSXZ}\n" +
+                                $"回答换行字：{Config.AIHH}\n" +
                                 $"上下文限制：{Config.AISXW}\n" +
-                                $"启用联网搜索：{Config.AILWSS}\n" +
-                                $"转发QQ群总开关：{Config.AIXXZF}\n" +
-                                $"转发QQ群：{Config.QQQL}\n" +
-                                $"AI设定：{Config.AISET}\n" +
+                                $"联网搜索：{Config.AILWSS}\n" +
+                                $"转发总开关：{Config.AIXXZF}\n" +
+                                $"转发群：{Config.QQQL}\n" +
+                                $"设定：{Config.AISET}\n" +
                                 $"temperature温度：{Config.AIWD}\n" +
                                 $"top_p核采样：{Config.AIHCY}";
             TShock.Log.ConsoleInfo(configInfo);
@@ -153,17 +153,14 @@ namespace Plugin
         #region 帮助信息
         private void BotHelp(CommandArgs args)  //显示帮助信息
         {
-            string helpMessage = "\n        [i:1344]可用AI聊天插件命令[i:1344]\n" +
-                                 "[i:1344]/aibot | /ab                     - 向AI提问\n" +
-                                 "[i:1344]/bot重置 | /bzc                  - 清除您的上下文\n" +
-                                 "[i:1344]/bot帮助 | /bbz                  - 显示此帮助信息\n" +
-                                 "[i:1344]/清除所有人的上下文              - 清除所有人的上下文:\n\n" +
-                                 "[i:1344]注意事项[i:1344]:\n" +
-                                $"[i:1344]- 聊天栏最前面输入“{AILTCF}”会触发AI\n" +
-                                 "[i:1344]- 记得定期使用 /bot重置或/bcz 来清理上下文记录。\n" +
-                                 "[i:1344]- 请不问AI敏感问题，AI回答不了，不信你试试。\n" +
-                                 "[i:1344]- 仅在您有需要时使用这些命令，以便保持对话的流畅性。\n";
-
+            string helpMessage = "\n     [i:1344]AI聊天插件帮助信息[i:1344]\n" +
+                                 "[i:1344]/ab                   - 向AI提问\n" +
+                                 "[i:1344]/bzc                  - 清除您的上下文\n" +
+                                 "[i:1344]/bbz                  - 显示此帮助信息\n" +
+                                 "[i:1344]/aiclearall           - 清除所有人的上下文:\n" +
+                                 "[i:1344]注意:\n" +
+                                $"[i:1344] - 聊天栏最前面输入“{AILTCF}”会触发AI\n" +
+                                 "[i:1344] - 请不问AI敏感问题，AI回答不了，不信你试试。\n";
             args.Player.SendInfoMessage(helpMessage);
         }
         #endregion
@@ -211,7 +208,7 @@ namespace Plugin
             if ((DateTime.Now - lastCmdTime).TotalSeconds < cooldownDuration)  //命令冷却中
             {
                 int remainingTime = cooldownDuration - (int)(DateTime.Now - lastCmdTime).TotalSeconds;  //计算剩余冷却时间
-                player.SendErrorMessage($"[i:1344]请耐心等待 {remainingTime} 秒后再输入![i:1344]");  //提示玩家
+                player.SendErrorMessage($"[i:1344]请耐心等待 {remainingTime} 秒后再输入![i:1344]");
                 return;  //返回
             }
             if (string.IsNullOrWhiteSpace(question))  //问题为空
@@ -220,7 +217,7 @@ namespace Plugin
                 return;  //返回
             }
             lastCmdTime = DateTime.Now;  //更新上一次命令时间
-            player.SendSuccessMessage("[i:1344]正在处理您的请求，请稍候... [i:1344]");  //提示玩家
+            player.SendSuccessMessage("[i:1344]正在处理您的请求，请稍候... [i:1344]");
             isProcessing[playerIndex] = true;  //玩家开始处理请求
             AddToContext(playerIndex, question);  //记录玩家的上下文
             Task.Run(async () =>   //异步处理请求
@@ -231,8 +228,7 @@ namespace Plugin
                 }
                 catch (Exception ex)  //处理请求时发生错误1
                 {
-                    string AICLQQSFSCW1 = $"[AI聊天插件] 处理请求时发生错误！请检查一下问题是否格式正确，详细信息：{ex.Message}\n" +
-                                           "如果问题持续存在，请联系插件作者：镜奇路蓝";
+                    string AICLQQSFSCW1 = $"[AI聊天插件] 处理请求时发生错误！请检查一下问题是否格式正确，详细信息：{ex.Message}\n";
                     TShock.Log.ConsoleError(AICLQQSFSCW1);
                     if (player.IsLoggedIn)  //玩家在线才发送错误信息
                     {
@@ -321,8 +317,7 @@ namespace Plugin
                     }
                     else  //AI未返回有效结果
                     {
-                        string AIWFHYXJG = "[AI聊天插件] 很抱歉，这次未获得有效的AI响应。\n" +
-                                           "如果问题持续存在，请随时联系插件作者：镜奇路蓝";
+                        string AIWFHYXJG = "[AI聊天插件] 很抱歉，这次未获得有效的AI响应。\n";
                         TShock.Log.ConsoleError(AIWFHYXJG);
                         if (player.IsLoggedIn)
                         {
@@ -332,8 +327,7 @@ namespace Plugin
                 }
                 else  //请求失败
                 {
-                    string AIQQSB = $"[AI聊天插件] AI未能及时响应，请稍后重试，状态码：{response.StatusCode}\n" +
-                                     "可以先尝试输入 /bcz 来清理上下文记录，如果问题不能解决，请联系此插件作者：镜奇路蓝";
+                    string AIQQSB = $"[AI聊天插件] AI未能及时响应，请稍后重试，状态码：{response.StatusCode}\n可以先尝试输入 /bcz 来清理上下文记录，如果问题不能解决，请联系此插件作者：镜奇路蓝";
                     TShock.Log.ConsoleError(AIQQSB);
                     if (player.IsLoggedIn)
                     {
@@ -352,8 +346,7 @@ namespace Plugin
             }
             catch (Exception ex)  //其他错误
             {
-                string AIQTCW = $"[AI聊天插件] 出现错误！请检查相关设置与请求！详细信息：{ex.Message}\n" +
-                                 "如果问题持续存在，记得检查一下输入是否正确或者联系此插件作者：镜奇路蓝";
+                string AIQTCW = $"[AI聊天插件] 出现错误！请检查相关设置与请求！详细信息：{ex.Message}\n";
                 TShock.Log.ConsoleError(AIQTCW);
                 if (player.IsLoggedIn)
                 {
