@@ -1,38 +1,29 @@
-using System;
-using System.Collections.Generic;
-using System.Net.Http;
+using Newtonsoft.Json;
+using System.Globalization;
+using System.Reflection;
 using System.Text;
-using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 using Terraria;
 using TerrariaApi.Server;
 using TShockAPI;
-using Newtonsoft.Json;
-using System.Reflection;
 using TShockAPI.Hooks;
-using System.IO;
-using System.Configuration;
-using System.Text.RegularExpressions;
-using System.Globalization;
-using System.Timers;
-using Microsoft.Xna.Framework;
 
 namespace Plugin
 {
     [ApiVersion(2, 1)]
     public class AIChatPlugin : TerrariaPlugin  //AI聊天插件
     {
-        #region 作者信息
+        #region 插件信息
         public override string Author => "镜奇路蓝";
         public override string Description => "AIChatPlugin ";
         public override string Name => "AIChatPlugin ";
-        public override Version Version => new Version(2, 3);
+        public override Version Version => new Version(2, 4);
         #endregion
-        #region 加载/卸载
-        #region 插件启动时执行的代码
+        #region 插件启动
         public AIChatPlugin(Main game) : base(game)  //插件加载时执行的代码
         {
-            LoadConfig();  //加载配置
             base.Order = 1;  //插件加载顺序
+            LoadConfig();  //加载配置
         }
         public override void Initialize()  //插件命令注册
         {
@@ -45,45 +36,19 @@ namespace Plugin
             ServerApi.Hooks.ServerChat.Register(this, OnChat);  //注册聊天钩子
         }
         #endregion
-        #region 插件卸载时执行的代码
+        #region 插件卸载
         protected override void Dispose(bool disposing)  //插件卸载时执行的代码
         {
-            try
-            {
-                if (disposing)
-                {
-                    PlayerHooks.PlayerLogout -= OnPlayerLogout;  //卸载玩家登出钩子
-                    ServerApi.Hooks.ServerChat.Deregister(this, OnChat); //卸载聊天钩子
-                    Commands.ChatCommands.RemoveAll(cmd => cmd.CommandDelegate.Method?.DeclaringType?.Assembly == Assembly.GetExecutingAssembly());  //移除插件所有命令
-                    playerContexts.Clear();  //清理所有玩家的上下文记录
-                    isProcessing.Clear();  //清理所有玩家的处理状态
-                }
-            }
-            catch (Exception ex)
-            {
-                TShock.Log.ConsoleError($"[AI聊天插件] 卸载时出现错误！详细信息：{ex.Message}");  //确保错误信息输出到控制台/日志
-            }
-            base.Dispose(disposing);
+           if (disposing)
+           {
+               PlayerHooks.PlayerLogout -= OnPlayerLogout;  //卸载玩家登出钩子
+               ServerApi.Hooks.ServerChat.Deregister(this, OnChat); //卸载聊天钩子
+               Commands.ChatCommands.RemoveAll(cmd => cmd.CommandDelegate.Method?.DeclaringType?.Assembly == Assembly.GetExecutingAssembly());  //移除插件所有命令
+               playerContexts.Clear();  //清理所有玩家的上下文记录
+               isProcessing.Clear();  //清理所有玩家的处理状态
+           }
         }
         #endregion
-        #endregion
-        #region 帮助信息
-        private void BotHelp(CommandArgs args)  //显示帮助信息
-        {
-            string helpMessage = "\n        [i:1344]可用AI聊天插件命令[i:1344]\n" +
-                                 "[i:1344]/aibot | /ab                     - 向AI提问\n" +
-                                 "[i:1344]/bot重置 | /bzc                  - 清除您的上下文\n" +
-                                 "[i:1344]/bot帮助 | /bbz                  - 显示此帮助信息\n" +
-                                 "[i:1344]/清除所有人的上下文              - 清除所有人的上下文:\n\n" +
-                                 "[i:1344]注意事项[i:1344]:\n" +
-                                $"[i:1344]- 聊天栏最前面输入“{AILTCF}”会触发AI\n" +
-                                 "[i:1344]- 记得定期使用 /bot重置或/bcz 来清理上下文记录。\n" +
-                                 "[i:1344]- 仅在您有需要时使用这些命令，以便保持对话的流畅性。\n";
-
-            args.Player.SendInfoMessage(helpMessage);
-        }
-        #endregion
-        #region 配置文件功能
         #region 创建配置
         public static Configuration Config { get; private set; } = new Configuration();  //配置文件类
         public static readonly string FilePath = Path.Combine(TShock.SavePath, "AI聊天自定义配置.json");  //创建配置文件在tshock目录下
@@ -130,7 +95,8 @@ namespace Plugin
             if (!File.Exists(FilePath))  //配置文件不存在
             {
                 Config = new Configuration();  //创建默认配置
-                WriteConfig();  //保存默认配置
+                string json = JsonConvert.SerializeObject(Config, Formatting.Indented);  //序列化配置
+                File.WriteAllText(FilePath, json);  //写入配置文件
             }
             else
             {
@@ -145,7 +111,7 @@ namespace Plugin
                             TShock.Log.ConsoleError($"[AI聊天插件] 配置文件中 模式 值无效，已使用默认值 1 ，并保留原配置");  //输出错误信息
                             tempConfig.AIMSQH = "1";  //使用默认值
                         }
-                        //解决配置文件绝大部分错误，并保留原配置
+                        //彻底解决配置文件相关的错误，并保留原配置
                         tempConfig.AILTCF = tempConfig.AILTCF ?? "AI";
                         tempConfig.AIZSXZ = tempConfig.AIZSXZ > 0 ? tempConfig.AIZSXZ : 666;
                         tempConfig.AIHH = tempConfig.AIHH > 0 ? tempConfig.AIHH : 50;
@@ -161,22 +127,13 @@ namespace Plugin
                 }
                 catch (Exception ex)  //读取配置文件时发生错误
                 {
-                    TShock.Log.ConsoleError($"[AI聊天插件] 加载配置时发生错误: {ex.Message}，已保留旧配置。");
+                    TShock.Log.ConsoleError($"[AI聊天插件] 加载配置时发生错误，已保留旧配置，详细信息：{ex.Message}");
                 }
             }
         }
-        private void WriteConfig()  // 保存配置
-        {
-            string json = JsonConvert.SerializeObject(Config, Formatting.Indented);  //序列化配置
-            File.WriteAllText(FilePath, json);  //写入配置文件
-        }
-        public void ReloadConfig()  //重载配置
-        {
-            LoadConfig();  //重新加载配置
-        }
         private void AIreload(CommandArgs args)  //显示配置信息并重新加载配置
         {
-            ReloadConfig();
+            LoadConfig();  //重新加载配置
             args.Player.SendSuccessMessage("[AI聊天插件] 配置已重新加载。");
             string configInfo = $"当前AI聊天配置：\n" +
                                 $"模型选择：{Config.AIMSQH}\n" +
@@ -193,9 +150,24 @@ namespace Plugin
             TShock.Log.ConsoleInfo(configInfo);
         }
         #endregion
+        #region 帮助信息
+        private void BotHelp(CommandArgs args)  //显示帮助信息
+        {
+            string helpMessage = "\n        [i:1344]可用AI聊天插件命令[i:1344]\n" +
+                                 "[i:1344]/aibot | /ab                     - 向AI提问\n" +
+                                 "[i:1344]/bot重置 | /bzc                  - 清除您的上下文\n" +
+                                 "[i:1344]/bot帮助 | /bbz                  - 显示此帮助信息\n" +
+                                 "[i:1344]/清除所有人的上下文              - 清除所有人的上下文:\n\n" +
+                                 "[i:1344]注意事项[i:1344]:\n" +
+                                $"[i:1344]- 聊天栏最前面输入“{AILTCF}”会触发AI\n" +
+                                 "[i:1344]- 记得定期使用 /bot重置或/bcz 来清理上下文记录。\n" +
+                                 "[i:1344]- 请不问AI敏感问题，AI回答不了，不信你试试。\n" +
+                                 "[i:1344]- 仅在您有需要时使用这些命令，以便保持对话的流畅性。\n";
+
+            args.Player.SendInfoMessage(helpMessage);
+        }
         #endregion
-        #region AI聊天功能
-        #region 触发AI请求
+        #region 问题审核
         private void ChatWithAICommand(CommandArgs args)  //命令触发AI回答
         {
             if (args.Parameters.Count == 0)  //参数为空
@@ -224,8 +196,6 @@ namespace Plugin
                 }
             }
         }
-        #endregion
-        #region 问题限制
         private static Dictionary<int, List<string>> playerContexts = new Dictionary<int, List<string>>();  //玩家上下文记录
         private static readonly Dictionary<int, bool> isProcessing = new Dictionary<int, bool>();  //玩家是否正在处理
         private static DateTime lastCmdTime = DateTime.MinValue;  //上一次命令时间
@@ -363,7 +333,7 @@ namespace Plugin
                 else  //请求失败
                 {
                     string AIQQSB = $"[AI聊天插件] AI未能及时响应，请稍后重试，状态码：{response.StatusCode}\n" +
-                                     "可以先尝试输入 /bot重置 来清理上下文记录，如果问题不能解决，请联系此插件作者：镜奇路蓝";
+                                     "可以先尝试输入 /bcz 来清理上下文记录，如果问题不能解决，请联系此插件作者：镜奇路蓝";
                     TShock.Log.ConsoleError(AIQQSB);
                     if (player.IsLoggedIn)
                     {
@@ -392,7 +362,7 @@ namespace Plugin
             }
         }
         #endregion
-        #region 上下文功能
+        #region 上下文限制
         private void BotReset(CommandArgs args)  //上下文重置
         {
             if (playerContexts.ContainsKey(args.Player.Index))  //上下文记录存在
@@ -453,7 +423,7 @@ namespace Plugin
             }
         }
         #endregion
-        #region AI回答限制
+        #region 回答限制/优化
         private string CleanMessage(string message)  //清理消息中的特殊字符
         {
             if (Regex.IsMatch(message, @"[\uD800-\uDBFF][\uDC00-\uDFFF]"))  //处理emoji
@@ -503,7 +473,7 @@ namespace Plugin
             return truncated.ToString();  //返回截断后的消息
         }
         #endregion
-        #region 通过CaiBot转发消息到群聊
+        #region CaiBot转发到群聊
         private object? caiBotPlugin;  //CaiBot插件对象
         private Task ForwardMessageToCaiBot(string playerName, string message)  //CaiBot转发消息到群聊
         {
@@ -558,7 +528,6 @@ namespace Plugin
             }
             return Task.CompletedTask;  //直接返回
         }
-        #endregion
         #endregion
     }
 }
