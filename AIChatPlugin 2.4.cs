@@ -266,7 +266,7 @@ namespace Plugin
                     : "";
                 string model = Config.AIMSQH == "1" ? "glm-4-flash" : "GLM-4V-Flash";  //选择模型
                 using HttpClient client = new HttpClient { Timeout = TimeSpan.FromSeconds(100) };  //超时时间为100秒
-                client.DefaultRequestHeaders.Add("Authorization", $"Bearer 742701d3fea4bed898578856989cb03c.5mKVzv5shSIqkkS7");  //设置API认证信息
+                client.DefaultRequestHeaders.Add("Authorization", $"Bearer 742701d3fea4bed898578856989cb03c.5mKVzv5shSIqkkS7");  //此APIkey为公益/默认/示例key可以长期免费使用
                 var tools = new List<object>();  //工具列表
                 if (Config.AILWSS)  //根据配置是否启动联网搜索功能
                 {
