@@ -1,3 +1,5 @@
+## [English User Manual](README.en-US.md)
+
 # [公益]AIChatPlugin - Terraria 插件
 
 ## 概述
