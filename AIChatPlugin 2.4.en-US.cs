@@ -267,7 +267,7 @@ namespace Plugin
                     : "";
                 string model = Config.AIMSQH == "1" ? "glm-4-flash" : "GLM-4V-Flash";  // Choose model
                 using HttpClient client = new HttpClient { Timeout = TimeSpan.FromSeconds(100) };  // Set timeout to 100 seconds
-                client.DefaultRequestHeaders.Add("Authorization", $"Bearer 742701d3fea4bed898578856989cb03c.5mKVzv5shSIqkkS7");  // Set API authorization information
+                client.DefaultRequestHeaders.Add("Authorization", $"Bearer f8c43cc53bb94acda549973949996a22.n0Bvza2UDU2ec050");  // Set API authorization information
                 var tools = new List<object>();  // Tools list
                 if (Config.AILWSS)  // Based on configuration whether to enable online search function
                 {
