@@ -1,4 +1,4 @@
-# AIChatPlugin - Terraria 插件
+# [公益]AIChatPlugin - Terraria 插件
 
 ## 概述
 
