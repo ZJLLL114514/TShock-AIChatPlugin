@@ -1,4 +1,4 @@
-# AIChatPlugin - Terraria Plugin
+# [commonweal]AIChatPlugin - Terraria Plugin
 
 ## Overview
 AIChatPlugin is a plugin designed for Terraria game servers, allowing players to interact with an AI dialogue system via chat. The plugin provides a simple interface for players to ask questions to the AI using specific commands or trigger words and receive responses.
